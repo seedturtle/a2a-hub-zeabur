@@ -204,7 +204,7 @@ button:hover{{opacity:0.9}}
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>{agents_rows}</table>
 
 <h3>Recent Conversations</h3>
-<table><tr><th style="width:70px">Time</th><th style="width:80px">From</th><th style="width:80px">To</th><th>Message</th><th style="width:200px">Response</th><th style="width:50px">Status</th></tr>{conv_rows}</table>
+<table><tr><th style="width:70px">Time</th><th style="width:80px">From</th><th style="width:80px">To</th><th style="width:40%">Message</th><th style="width:40%">Response</th><th style="width:50px">Status</th></tr>{conv_rows}</table>
 
 <script>
 async function broadcastMsg(){{
