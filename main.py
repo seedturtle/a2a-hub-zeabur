@@ -32,14 +32,14 @@ agents: Dict[str, dict] = {
         "name": "Terminator",
         "url": "https://m90slave.zeabur.app",
         "description": "Terminator",
-        "api_key": "sk-8652c38d5a40540d133692a882d047b8",
+        "api_key": "xt9pa8KcP7kQFHo5n1r2uJ3w4DZ60qjS",
         "registered_at": "2026-03-15T00:00:00"
     },
     "john-connor": {
         "name": "John Connor",
         "url": "https://johnconnor.zeabur.app",
         "description": "John Connor",
-        "api_key": "sk-0e62b58d3de4c4a43f99d32941faeacf",
+        "api_key": "w6cL7DQus4CE50U9r32kqAjPMpJdxR81",
         "registered_at": "2026-03-15T00:00:00"
     }
 }
