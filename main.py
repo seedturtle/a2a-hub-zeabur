@@ -150,8 +150,8 @@ async def dashboard(admin_key: str = None):
     conv_rows = ""
     for c in conversations[-30:]:
         time_str = format_time(c['time'])
-        msg = c['message'][:80] + "..." if len(c['message']) > 99999 else c['message']
-        resp = c.get('response', '')[:60] + "..." if len(c.get('response', '')) > 99999 else c.get('response', '')
+        msg = c['message']
+        resp = c.get('response', '')
         status_color = "#22c55e" if c['status'] == "200" else "#ef4444"
         conv_rows += f"<tr><td style='font-size:12px;color:#888'>{time_str}</td><td>{c['from']}</td><td>{c['to']}</td><td>{msg}</td><td style='font-size:12px;color:#666'>{resp}</td><td style='color:{status_color}'>{c['status']}</td></tr>"
     
