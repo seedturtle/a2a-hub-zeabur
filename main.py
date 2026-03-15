@@ -212,7 +212,7 @@ async function broadcastMsg(){{
     const name = document.getElementById('senderName').value;
     if(!msg) return alert('請輸入訊息');
     try{{
-        await fetch('/broadcast',{{method:'POST',headers:{{'Content-Type':'application/json','x-admin-key':'{ADMIN_KEY}'}},body:JSON.stringify({{message:msg,sender_name:name}})}});
+        await fetch('/broadcast',{{method:'POST',headers:{{'Content-Type':'application/json','x-admin-key':'hub-admin-2026'}},body:JSON.stringify({{message:msg,sender_name:name}})}});
         alert('廣播已發送！');
         location.reload();
     }}catch(e){{alert('錯誤: '+e.message)}}}}
@@ -222,7 +222,7 @@ async function sendMsg(){{
     const msg = document.getElementById('sendMsg').value;
     if(!to || !msg) return alert('請選擇 Agent 並輸入訊息');
     try{{
-        await fetch('/invoke',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target_id:to,message:msg,sender_id:'admin'}})}});
+        await fetch('/invoke',{{method:'POST',headers:{{'Content-Type':'application/json','x-api-key':'{admin_key}'}},body:JSON.stringify({{target_id:to,message:msg,sender_id:'admin'}})}});
         alert('訊息已發送！');
         location.reload();
     }}catch(e){{alert('錯誤: '+e.message)}}}}
