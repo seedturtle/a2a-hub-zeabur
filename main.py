@@ -25,7 +25,7 @@ agents: Dict[str, dict] = {
         "name": "Kiritu",
         "url": "https://kiritu.zeabur.app",
         "description": "奇異兔",
-        "api_key": "sk-dea02b469da70377503f82a58c24a54d",
+        "api_key": "PRSkI0h7mx84YDeg612vpyrbLlU35G9w",
         "registered_at": "2026-03-15T00:00:00"
     },
     "terminator": {
