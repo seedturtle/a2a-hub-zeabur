@@ -113,46 +113,64 @@ async def dashboard(admin_key: str = None):
     if admin_key != ADMIN_KEY:
         return """<html><body style='font-family:sans-serif;padding:40px'><h2>A2A Hub Dashboard</h2><form method='get' action='/dashboard'><label>Admin Key: <input type='password' name='admin_key'/></label><button type='submit'>Login</button></form></body></html>"""
     
-    agents_html = "".join([f"<tr><td>{a}</td><td>{agents[a]['name']}</td><td><a href='{agents[a]['url']}' target='_blank'>{agents[a]['url']}</a></td><td>{agents[a].get('description','')}</td></tr>" for a in agents])
-    conv_html = "".join([f"<tr><td>{c['time']}</td><td>{c['from']}</td><td>{c['to']}</td><td>{c['message'][:50]}</td><td>{c['status']}</td></tr>" for c in conversations[-20:]])
+    # 格式化時間為台北時間
+    def format_time(iso_time):
+        try:
+            dt = datetime.fromisoformat(iso_time.replace('Z', '+00:00'))
+            dt = dt.replace(tzinfo=None)  # 移除時區資訊
+            return dt.strftime("%H:%M:%S")
+        except:
+            return iso_time[:8]
+    
+    # 格式化對話列表
+    conv_rows = ""
+    for c in conversations[-30:]:
+        time_str = format_time(c['time'])
+        msg = c['message'][:80] + "..." if len(c['message']) > 80 else c['message']
+        resp = c.get('response', '')[:60] + "..." if len(c.get('response', '')) > 60 else c.get('response', '')
+        status_color = "#22c55e" if c['status'] == "200" else "#ef4444"
+        conv_rows += f"<tr><td style='font-size:12px;color:#888'>{time_str}</td><td>{c['from']}</td><td>{c['to']}</td><td>{msg}</td><td style='font-size:12px;color:#666'>{resp}</td><td style='color:{status_color}'>{c['status']}</td></tr>"
+    
+    agents_rows = "".join([f"<tr><td>{a}</td><td>{agents[a]['name']}</td><td><a href='{agents[a]['url']}' target='_blank' style='color:#4f46e5'>{agents[a]['url'][:40]}...</a></td></tr>" for a in agents])
     
     html = f"""<!DOCTYPE html>
-<html><head><title>A2A Hub Dashboard</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>A2A Hub Dashboard</title>
 <style>
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;background:#f5f5f5}}
-h2{{color:#333}}h3{{color:#555;margin-top:30px}}
-table{{border-collapse:collapse;width:100%;background:white;border-radius:8px;overflow:hidden}}
-th{{background:#4f46e5;color:white;padding:12px;text-align:left}}
-td{{padding:10px;border-bottom:1px solid #eee}}
-.badge{{background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px}}
-.card{{background:white;padding:20px;border-radius:12px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}}
-input,textarea{{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:10px 0;font-size:14px}}
-button{{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px}}
+h2{{color:#333;display:flex;align-items:center;gap:10px}}h3{{color:#555;margin-top:25px}}
+.badge{{background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px;font-size:14px}}
+.card{{background:white;padding:20px;border-radius:12px;margin:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}}
+table{{border-collapse:collapse;width:100%;background:white;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)}}
+th{{background:#4f46e5;color:white;padding:10px 12px;text-align:left;font-size:13px}}
+td{{padding:8px 12px;border-bottom:1px solid #eee;font-size:13px}}
+input,textarea,select{{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:8px 0;font-size:14px}}
+button{{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}}
 button:hover{{opacity:0.9}}
-</style>
-</head>
+.row{{display:flex;gap:10px;align-items:center}}
+.row input{{margin:0}}
+</style></head>
 <body>
 <h2>A2A Hub Dashboard <span class='badge'>LIVE</span></h2>
 
-<!-- 廣播訊息 -->
+<!-- 廣播 -->
 <div class="card">
-<h3>📢 廣播訊息 (Broadcast)</h3>
+<h3>📢 廣播訊息</h3>
 <form onsubmit="event.preventDefault();broadcastMsg()">
-<input type="text" id="broadcastMsg" placeholder="輸入廣播訊息...">
-<input type="text" id="senderName" placeholder="發送者名稱" value="Admin">
-<button type="submit">📢 發送廣播</button>
+<div class="row">
+<input type="text" id="broadcastMsg" placeholder="輸入廣播訊息..." style="flex:1">
+<input type="text" id="senderName" placeholder="發送者" value="Admin" style="width:100px">
+<button type="submit">📢 發送</button>
+</div>
 </form>
 </div>
 
-<!-- 發送訊息給特定 Agent -->
+<!-- 發送訊息 -->
 <div class="card">
 <h3>💬 發送訊息給 Agent</h3>
 <form onsubmit="event.preventDefault();sendMsg()">
-<select id="targetId" style="padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:10px 0">
+<select id="targetId" style="padding:12px">
 <option value="">選擇 Agent...</option>
-{''.join([f'<option value="{a}">{agents[a]["name"]} ({a})</option>' for a in agents])}
+{''.join([f'<option value="{a}">{agents[a]["name"]}</option>' for a in agents])}
 </select>
 <textarea id="sendMsg" rows="2" placeholder="輸入訊息..."></textarea>
 <button type="submit">💬 發送</button>
@@ -161,40 +179,31 @@ button:hover{{opacity:0.9}}
 
 <p>Registered Agents: <strong>{len(agents)}</strong></p>
 <h3>Registered Agents ({len(agents)})</h3>
-<table><tr><th>ID</th><th>Name</th><th>URL</th><th>Description</th></tr>{agents_html}</table>
+<table><tr><th>ID</th><th>Name</th><th>URL</th></tr>{agents_rows}</table>
+
 <h3>Recent Conversations</h3>
-<table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Status</th></tr>{conv_html}</table>
+<table><tr><th style="width:70px">Time</th><th style="width:80px">From</th><th style="width:80px">To</th><th>Message</th><th style="width:200px">Response</th><th style="width:50px">Status</th></tr>{conv_rows}</table>
 
 <script>
-async function broadcastMsg() {{
+async function broadcastMsg(){{
     const msg = document.getElementById('broadcastMsg').value;
     const name = document.getElementById('senderName').value;
     if(!msg) return alert('請輸入訊息');
-    try {{
-        await fetch('/broadcast?admin_key={ADMIN_KEY}', {{
-            method: 'POST',
-            headers: {{'Content-Type': 'application/json'}},
-            body: JSON.stringify({{message: msg, sender_name: name}})
-        }});
+    try{{
+        await fetch('/broadcast',{{method:'POST',headers:{{'Content-Type':'application/json','x-admin-key':'{ADMIN_KEY}'}},body:JSON.stringify({{message:msg,sender_name:name}})}});
         alert('廣播已發送！');
         location.reload();
-    }} catch(e) {{ alert('錯誤: ' + e.message); }}
-}}
+    }}catch(e){{alert('錯誤: '+e.message)}}}}
 
-async function sendMsg() {{
+async function sendMsg(){{
     const to = document.getElementById('targetId').value;
     const msg = document.getElementById('sendMsg').value;
     if(!to || !msg) return alert('請選擇 Agent 並輸入訊息');
-    try {{
-        await fetch('/invoke', {{
-            method: 'POST',
-            headers: {{'Content-Type': 'application/json'}},
-            body: JSON.stringify({{target_id: to, message: msg, sender_id: 'admin'}})
-        }});
+    try{{
+        await fetch('/invoke',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target_id:to,message:msg,sender_id:'admin'}})}});
         alert('訊息已發送！');
         location.reload();
-    }} catch(e) {{ alert('錯誤: ' + e.message); }}
-}}
+    }}catch(e){{alert('錯誤: '+e.message)}}}}
 </script>
 </body></html>"""
     return HTMLResponse(content=html)
@@ -219,7 +228,8 @@ button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:non
 let agents=[];
 async function loadAgents(){{try{{const resp=await fetch('/agents');agents=await resp.json();const sel=document.getElementById('targetId');sel.innerHTML='<option value="">Select...</option>';agents.forEach(a=>{{const opt=document.createElement('option');opt.value=a.id;opt.textContent=a.name+' ('+a.id+')';sel.appendChild(opt)}})}}catch(e){{}}}}
 async function sendMessage(){{const s=document.getElementById('senderId').value;const t=document.getElementById('targetId').value;const m=document.getElementById('message').value;if(!s||!t||!m){{alert('Please fill all');return}}const msgs=document.getElementById('messages');msgs.innerHTML+='<div class="message user">'+m+'</div>';msgs.scrollTop=msgs.scrollHeight;try{{const resp=await fetch('/invoke',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target_id:t,message:m,sender_id:s}})}});const d=await resp.json();msgs.innerHTML+='<div class="message bot">'+(d.response||d.error)+'</div>';msgs.scrollTop=msgs.scrollHeight}}catch(e){{msgs.innerHTML+='<div class="error">'+e.message+'</div>'}}}}
-loadAgents();</script></body></html>"""
+loadAgents();
+</script></body></html>"""
     return HTMLResponse(content=html)
 
 if __name__ == "__main__":
