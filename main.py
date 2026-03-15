@@ -320,6 +320,28 @@ async def dashboard(admin_key: str = None):
     {agents_html}
     </table>
     
+    <h3>📢 Broadcast Message</h3>
+    <form onsubmit="event.preventDefault();broadcastMsg()" style="background:white;padding:20px;border-radius:8px;margin:20px 0">
+    <p><textarea id="broadcastMsg" placeholder="Enter broadcast message..." rows="3" style="width:100%;padding:10px"></textarea></p>
+    <p><input type="text" id="senderName" placeholder="Sender name" value="Admin" style="padding:8px"></p>
+    <p><button type="submit" style="background:#4f46e5;color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer">📢 Broadcast</button></p>
+    </form>
+    <script>
+    async function broadcastMsg() {
+        const msg = document.getElementById("broadcastMsg").value;
+        const name = document.getElementById("senderName").value;
+        const key = new URLSearchParams(window.location.search).get("admin_key");
+        
+        const resp = await fetch("/broadcast?admin_key=" + key, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: msg, sender_name: name})
+        });
+        alert("Broadcast sent!");
+        location.reload();
+    }
+    </script>
+    
     <h3>Recent Conversations (last 20)</h3>
     <table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Status</th></tr>
     {conv_html}
@@ -329,6 +351,54 @@ async def dashboard(admin_key: str = None):
     """
     
     return HTMLResponse(content=html)
+
+
+
+# ============== 廣播功能 ==============
+class BroadcastRequest(BaseModel):
+    message: str
+    sender_name: str = "Admin"
+
+@app.post("/broadcast")
+async def broadcast_message(
+    request: BroadcastRequest,
+    x_admin_key: str = Header(None)
+):
+    """Broadcast message to all registered agents"""
+    if x_admin_key != ADMIN_KEY:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+    
+    results = []
+    
+    # 發送給每個 agent
+    for agent_id, agent in agents.items():
+        try:
+            response = await call_agent(
+                agent["url"],
+                f"[廣播] {request.message}",
+                agent.get("api_key")
+            )
+            results.append({
+                "agent_id": agent_id,
+                "status": "success",
+                "response": response[:100] if response else ""
+            })
+            add_conversation("admin", agent_id, request.message, response, "200")
+        except Exception as e:
+            results.append({
+                "agent_id": agent_id,
+                "status": "error",
+                "error": str(e)
+            })
+            add_conversation("admin", agent_id, request.message, str(e), "500")
+    
+    return {
+        "message": request.message,
+        "sender": request.sender_name,
+        "recipients": len(agents),
+        "results": results
+    }
+
 
 # ============== 啟動 ==============
 if __name__ == "__main__":

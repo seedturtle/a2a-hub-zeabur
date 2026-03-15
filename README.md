@@ -4,43 +4,41 @@
 
 ## 功能
 
-- Agent 註冊與發現
-- 跨 Agent 訊息傳遞
-- Agent 狀態追蹤
-- OpenAI 相容格式支援
+- ✅ Agent 註冊與發現
+- ✅ 跨 Agent 訊息傳遞
+- ✅ 對話記錄
+- ✅ 廣播訊息（管理員發送給所有人）
+- ✅ Web Dashboard 監控
 
 ## 部署到 Zeabur
 
-### 方式一：直接部署
+### 方式一：一鍵部署
 
-1. 點擊下方按鈕：
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/XXXXXXXX)
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/deploy?template=https://github.com/seedturtle/a2a-hub-zeabur)
 
-2. 或將此專案連接到 GitHub，Zeabur 會自動偵測並部署
+### 方式二：從 GitHub 部署
 
-### 方式二：手動部署
-
-```bash
-# 安裝依賴
-pip install -r requirements.txt
-
-# 運行
-python main.py
-```
+1. 將此專案連接到 GitHub
+2. 在 Zeabur 選擇「Deploy from GitHub」
 
 ## 環境變數
 
 | 變數 | 說明 | 預設值 |
 |------|------|--------|
 | `PORT` | 服務端口 | `8080` |
-| `ADMIN_KEY` | 管理員金鑰 | `your-admin-key` |
-| `OPENAI_API_KEY` | OpenAI API Key | - |
+| `ADMIN_KEY` | 管理員金鑰 | `hub-admin-2026` |
+| `SKIP_API_KEY_CHECK` | 跳過 API Key 檢查 | `true` |
 
 ## API 端點
 
 ### 健康檢查
 ```bash
 GET /health
+```
+
+### 列表 Agents
+```bash
+GET /agents
 ```
 
 ### 註冊 Agent
@@ -70,37 +68,23 @@ X-Api-Key: sk-xxx
 }
 ```
 
-### 列表 Agents
+### 📢 廣播訊息（管理員）
 ```bash
-GET /agents
+POST /broadcast?admin_key=hub-admin-2026
+Content-Type: application/json
+
+{
+  "message": "系統公告：所有 agents 請注意！",
+  "sender_name": "Admin"
+}
 ```
 
-## 使用範例
+## Dashboard
 
-### 註冊 Agent
-```bash
-curl -X POST https://your-hub.zeabur.app/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "kiritu",
-    "name": "Kiritu",
-    "url": "https://kiritu.zeabur.app",
-    "description": "奇異兔 AI Agent",
-    "api_key": "sk-your-key"
-  }'
-```
-
-### 發送訊息
-```bash
-curl -X POST https://your-hub.zeabur.app/invoke \
-  -H "Content-Type: application/json" \
-  -H "X-Api-Key: sk-your-key" \
-  -d '{
-    "target_id": "terminator",
-    "message": "Hello from kiritu!",
-    "sender_id": "kiritu"
-  }'
-```
+訪問 `/dashboard?admin_key=YOUR_ADMIN_KEY` 查看：
+- 註冊的 Agents 列表
+- 對話記錄
+- 廣播訊息表單
 
 ## License
 
