@@ -19,8 +19,30 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 ADMIN_KEY = os.getenv("ADMIN_KEY", "hub-admin-2026")
 SKIP_API_KEY_CHECK = os.getenv("SKIP_API_KEY_CHECK", "true").lower() == "true"
 
-# 資料儲存
-agents: Dict[str, dict] = {}
+# 資料儲存 - 預設 agents
+agents: Dict[str, dict] = {
+    "kiritu": {
+        "name": "Kiritu",
+        "url": "https://kiritu.zeabur.app",
+        "description": "奇異兔",
+        "api_key": "sk-dea02b469da70377503f82a58c24a54d",
+        "registered_at": "2026-03-15T00:00:00"
+    },
+    "terminator": {
+        "name": "Terminator",
+        "url": "https://m90slave.zeabur.app",
+        "description": "Terminator",
+        "api_key": "sk-8652c38d5a40540d133692a882d047b8",
+        "registered_at": "2026-03-15T00:00:00"
+    },
+    "john-connor": {
+        "name": "John Connor",
+        "url": "https://johnconnor.zeabur.app",
+        "description": "John Connor",
+        "api_key": "sk-0e62b58d3de4c4a43f99d32941faeacf",
+        "registered_at": "2026-03-15T00:00:00"
+    }
+}
 conversations: List[dict] = []
 
 # 模型
