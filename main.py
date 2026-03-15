@@ -50,13 +50,13 @@ def add_conversation(from_id: str, to_id: str, message: str, response: str, stat
     })
     if len(conversations) > 100: conversations.pop(0)
 
-async def call_agent(agent_url: str, message: str, api_key: str = None) -> str:
+async def call_agent(Agent_url: str, message: str, api_key: str = None) -> str:
     headers = {"Content-Type": "application/json"}
     if api_key: headers["Authorization"] = f"Bearer {api_key}"
     payload = {"model": "openclaw", "messages": [{"role": "user", "content": message}], "max_tokens": 2000}
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(f"{agent_url}/v1/chat/completions", json=payload, headers=headers)
+            resp = await client.post(f"{Agent_url}/v1/chat/completions", json=payload, headers=headers)
             if resp.status_code == 200: return resp.json()["choices"][0]["message"]["content"]
             return f"Error: {resp.status_code}"
     except Exception as e: return f"Error: {str(e)}"
@@ -112,100 +112,114 @@ async def broadcast_message(request: BroadcastRequest, x_admin_key: str = Header
 async def dashboard(admin_key: str = None):
     if admin_key != ADMIN_KEY:
         return """<html><body style='font-family:sans-serif;padding:40px'><h2>A2A Hub Dashboard</h2><form method='get' action='/dashboard'><label>Admin Key: <input type='password' name='admin_key'/></label><button type='submit'>Login</button></form></body></html>"""
+    
     agents_html = "".join([f"<tr><td>{a}</td><td>{agents[a]['name']}</td><td><a href='{agents[a]['url']}' target='_blank'>{agents[a]['url']}</a></td><td>{agents[a].get('description','')}</td></tr>" for a in agents])
-    conv_html = "".join([f"<tr><td>{c['time']}</td><td>{c['from']}</td><td>{c['to']}</td><td>{c['message'][:50]}</td><td>{c['status']}</td><td><button onclick=\"replyTo(''{c['from']}',''{c['message']}'\")\" style=\"background:#22c55e;color:white;padding:5px 10px;border:none;border-radius:4px;cursor:pointer\">回覆</button></td></tr>" for c in conversations[-20:]])
-    html = f"""<html><head><title>A2A Hub Dashboard</title><style>body{{font-family:sans-serif;padding:20px;background:#f5f5f5}}table{{border-collapse:collapse;width:100%;background:white}}th{{background:#4f46e5;color:white;padding:10px}}td{{padding:8px;border-bottom:1px solid #eee}}</style></head><body><h2>A2A Hub Dashboard</h2><p>Agents: {len(agents)}</p><h3>Agents</h3><table><tr><th>ID</th><th>Name</th><th>URL</th><th>Description</th></tr>{agents_html}</table><h3>Conversations</h3><table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Action</th></tr>{conv_html}</table></body></html>"""
+    conv_html = "".join([f"<tr><td>{c['time']}</td><td>{c['from']}</td><td>{c['to']}</td><td>{c['message'][:50]}</td><td>{c['status']}</td></tr>" for c in conversations[-20:]])
+    
+    html = f"""<!DOCTYPE html>
+<html><head><title>A2A Hub Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<style>
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;background:#f5f5f5}}
+h2{{color:#333}}h3{{color:#555;margin-top:30px}}
+table{{border-collapse:collapse;width:100%;background:white;border-radius:8px;overflow:hidden}}
+th{{background:#4f46e5;color:white;padding:12px;text-align:left}}
+td{{padding:10px;border-bottom:1px solid #eee}}
+.badge{{background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px}}
+.card{{background:white;padding:20px;border-radius:12px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}}
+input,textarea{{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:10px 0;font-size:14px}}
+button{{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px}}
+button:hover{{opacity:0.9}}
+</style>
+</head>
+<body>
+<h2>A2A Hub Dashboard <span class='badge'>LIVE</span></h2>
+
+<!-- 廣播訊息 -->
+<div class="card">
+<h3>📢 廣播訊息 (Broadcast)</h3>
+<form onsubmit="event.preventDefault();broadcastMsg()">
+<input type="text" id="broadcastMsg" placeholder="輸入廣播訊息...">
+<input type="text" id="senderName" placeholder="發送者名稱" value="Admin">
+<button type="submit">📢 發送廣播</button>
+</form>
+</div>
+
+<!-- 發送訊息給特定 Agent -->
+<div class="card">
+<h3>💬 發送訊息給 Agent</h3>
+<form onsubmit="event.preventDefault();sendMsg()">
+<select id="targetId" style="padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:10px 0">
+<option value="">選擇 Agent...</option>
+{''.join([f'<option value="{a}">{agents[a]["name"]} ({a})</option>' for a in agents])}
+</select>
+<textarea id="sendMsg" rows="2" placeholder="輸入訊息..."></textarea>
+<button type="submit">💬 發送</button>
+</form>
+</div>
+
+<p>Registered Agents: <strong>{len(agents)}</strong></p>
+<h3>Registered Agents ({len(agents)})</h3>
+<table><tr><th>ID</th><th>Name</th><th>URL</th><th>Description</th></tr>{agents_html}</table>
+<h3>Recent Conversations</h3>
+<table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Status</th></tr>{conv_html}</table>
+
+<script>
+async function broadcastMsg() {{
+    const msg = document.getElementById('broadcastMsg').value;
+    const name = document.getElementById('senderName').value;
+    if(!msg) return alert('請輸入訊息');
+    try {{
+        await fetch('/broadcast?admin_key={ADMIN_KEY}', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{message: msg, sender_name: name}})
+        }});
+        alert('廣播已發送！');
+        location.reload();
+    }} catch(e) {{ alert('錯誤: ' + e.message); }}
+}}
+
+async function sendMsg() {{
+    const to = document.getElementById('targetId').value;
+    const msg = document.getElementById('sendMsg').value;
+    if(!to || !msg) return alert('請選擇 Agent 並輸入訊息');
+    try {{
+        await fetch('/invoke', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{target_id: to, message: msg, sender_id: 'admin'}})
+        }});
+        alert('訊息已發送！');
+        location.reload();
+    }} catch(e) {{ alert('錯誤: ' + e.message); }}
+}}
+</script>
+</body></html>"""
     return HTMLResponse(content=html)
 
 @app.get("/chat")
 async def chat_page():
     html = """<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>A2A Hub Chat</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}.container{max-width:800px;margin:0 auto}h1{color:white;text-align:center;margin-bottom:20px}.card{background:white;border-radius:16px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}.form-group{margin-bottom:15px}label{display:block;margin-bottom:5px;font-weight:600;color:#333}input,textarea,select{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}input:focus,textarea:focus,select:focus{outline:none;border-color:#667eea}button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;width:100%}button:hover{opacity:0.9}.messages{margin-top:20px;max-height:500px;overflow-y:auto}.message{padding:12px 16px;margin-bottom:10px;border-radius:12px}.message.user{background:#667eea;color:white;margin-left:20%}.message.bot{background:#f0f0f0;color:#333;margin-right:20%}.message .sender{font-size:12px;opacity:0.8;margin-bottom:4px}.error{background:#fee;color:#c00;padding:10px;border-radius:8px}</style></head><body><div class="container"><h1>🤖 A2A Hub Chat</h1><div class="card"><div class="form-group"><label>Your Agent ID</label><input type="text" id="senderId" placeholder="e.g., kiritu"></div><div class="form-group"><label>Your API Key</label><input type="password" id="apiKey" placeholder="Your API key"></div><div class="form-group"><label>Send to Agent</label><select id="targetId"><option value="">Loading agents...</option></select></div><div class="form-group"><label>Message</label><textarea id="message" rows="3" placeholder="Type your message..."></textarea></div><button onclick="sendMessage()">Send Message</button></div><div class="messages" id="messages"></div></div><script>let agents=[];async function loadAgents(){try{const resp=await fetch('/agents');agents=await resp.json();const sel=document.getElementById('targetId');sel.innerHTML='<option value="">Select agent...</option>';agents.forEach(a=>{const opt=document.createElement('option');opt.value=a.id;opt.textContent=a.name+' ('+a.id+')';sel.appendChild(opt)})}catch(e){console.error(e)}}async function sendMessage(){const s=document.getElementById('senderId').value;const k=document.getElementById('apiKey').value;const t=document.getElementById('targetId').value;const m=document.getElementById('message').value;if(!s||!t||!m){alert('Please fill all fields');return}const msgs=document.getElementById('messages');msgs.innerHTML+='<div class="message user"><div class="sender">You → '+t+'</div>'+m+'</div>';document.getElementById('message').value='';msgs.scrollTop=msgs.scrollHeight;msgs.innerHTML+='<div class="message bot loading">Thinking...</div>';try{const resp=await fetch('/invoke',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target_id:t,message:m,sender_id:s})});const data=await resp.json();msgs.removeChild(msgs.lastChild);msgs.innerHTML+='<div class="message bot"><div class="sender">'+t+' responded</div>'+(data.response||data.error||'No response')+'</div>';msgs.scrollTop=msgs.scrollHeight}catch(e){msgs.removeChild(msgs.lastChild);msgs.innerHTML+='<div class="error">Error: '+e.message+'</div>'}}loadAgents();document.getElementById('message').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}})
-function replyTo(from, msg) {
-    document.getElementById('replyForm').style.display = 'block';
-    document.getElementById('replyTo').textContent = from;
-    document.getElementById('replyTarget').value = from;
-    document.getElementById('replyMessage').value = 'Re: ' + msg;
-}
-async function sendReply() {
-    const to = document.getElementById('replyTarget').value;
-    const msg = document.getElementById('replyMessage').value;
-    const key = new URLSearchParams(window.location.search).get('admin_key');
-    try {
-        await fetch('/invoke?admin_key=' + key, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({target_id: to, message: msg, sender_id: 'admin'})
-        });
-        alert('回覆已發送！');
-        location.reload();
-    } catch(e) {
-        alert('錯誤: ' + e.message);
-    }
-}</script>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>A2A Hub Chat</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:20px}
+.container{max-width:800px;margin:0 auto}h1{color:white;text-align:center;margin-bottom:20px}.card{background:white;border-radius:16px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.form-group{margin-bottom:15px}label{display:block;margin-bottom:5px;font-weight:600;color:#333}input,textarea,select{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}input:focus,textarea:focus,select:focus{outline:none;border-color:#667eea}
+button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px;width:100%}button:hover{opacity:0.9}.messages{margin-top:20px;max-height:500px;overflow-y:auto}.message{padding:12px 16px;margin-bottom:10px;border-radius:12px}.message.user{background:#667eea;color:white;margin-left:20%}.message.bot{background:#f0f0f0;color:#333;margin-right:20%}.error{background:#fee;color:#c00;padding:10px;border-radius:8px}
+</style></head>
+<body><div class="container"><h1>🤖 A2A Hub Chat</h1><div class="card">
+<div class="form-group"><label>Your Agent ID</label><input type="text" id="senderId" placeholder="e.g., kiritu"></div>
+<div class="form-group"><label>Your API Key</label><input type="password" id="apiKey" placeholder="Your API key"></div>
+<div class="form-group"><label>Send to Agent</label><select id="targetId"><option value="">Loading...</option></select></div>
+<div class="form-group"><label>Message</label><textarea id="message" rows="3" placeholder="Type your message..."></textarea></div>
+<button onclick="sendMessage()">Send Message</button></div><div class="messages" id="messages"></div></div>
 <script>
-async function broadcastMsg() {
-    const msg = document.getElementById('broadcastMsg').value;
-    const name = document.getElementById('senderName').value;
-    if(!msg) return alert('請輸入訊息');
-    const key = new URLSearchParams(window.location.search).get('admin_key');
-    try {
-        await fetch('/broadcast?admin_key=' + key, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message: msg, sender_name: name})
-        });
-        alert('廣播已發送！');
-        location.reload();
-    } catch(e) {
-        alert('錯誤: ' + e.message);
-    }
-}
-
-function replyTo(from, msg) {
-    document.getElementById('replyForm').style.display = 'block';
-    document.getElementById('replyTo').textContent = from;
-    document.getElementById('replyTarget').value = from;
-    document.getElementById('replyMessage').value = 'Re: ' + msg;
-}
-async function sendReply() {
-    const to = document.getElementById('replyTarget').value;
-    const msg = document.getElementById('replyMessage').value;
-    const key = new URLSearchParams(window.location.search).get('admin_key');
-    try {
-        await fetch('/invoke?admin_key=' + key, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({target_id: to, message: msg, sender_id: 'admin'})
-        });
-        alert('回覆已發送！');
-        location.reload();
-    } catch(e) {
-        alert('錯誤: ' + e.message);
-    }
-}</script>
-function replyTo(from, msg) {
-    document.getElementById('replyForm').style.display = 'block';
-    document.getElementById('replyTo').textContent = from;
-    document.getElementById('replyTarget').value = from;
-    document.getElementById('replyMessage').value = 'Re: ' + msg;
-}
-async function sendReply() {
-    const to = document.getElementById('replyTarget').value;
-    const msg = document.getElementById('replyMessage').value;
-    const key = new URLSearchParams(window.location.search).get('admin_key');
-    try {
-        await fetch('/invoke?admin_key=' + key, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({target_id: to, message: msg, sender_id: 'admin'})
-        });
-        alert('回覆已發送！');
-        location.reload();
-    } catch(e) {
-        alert('錯誤: ' + e.message);
-    }
-}</script></body></html>"""
+let agents=[];
+async function loadAgents(){{try{{const resp=await fetch('/agents');agents=await resp.json();const sel=document.getElementById('targetId');sel.innerHTML='<option value="">Select...</option>';agents.forEach(a=>{{const opt=document.createElement('option');opt.value=a.id;opt.textContent=a.name+' ('+a.id+')';sel.appendChild(opt)}})}}catch(e){{}}}}
+async function sendMessage(){{const s=document.getElementById('senderId').value;const t=document.getElementById('targetId').value;const m=document.getElementById('message').value;if(!s||!t||!m){{alert('Please fill all');return}}const msgs=document.getElementById('messages');msgs.innerHTML+='<div class="message user">'+m+'</div>';msgs.scrollTop=msgs.scrollHeight;try{{const resp=await fetch('/invoke',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{target_id:t,message:m,sender_id:s}})}});const d=await resp.json();msgs.innerHTML+='<div class="message bot">'+(d.response||d.error)+'</div>';msgs.scrollTop=msgs.scrollHeight}}catch(e){{msgs.innerHTML+='<div class="error">'+e.message+'</div>'}}}}
+loadAgents();</script></body></html>"""
     return HTMLResponse(content=html)
 
 if __name__ == "__main__":
