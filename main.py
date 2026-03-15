@@ -139,7 +139,9 @@ async def dashboard(admin_key: str = None):
     def format_time(iso_time):
         try:
             dt = datetime.fromisoformat(iso_time.replace('Z', '+00:00'))
-            dt = dt.replace(tzinfo=None)  # 移除時區資訊
+            # 轉換為台北時間 (UTC+8)
+            from datetime import timedelta
+            dt = dt + timedelta(hours=8)
             return dt.strftime("%H:%M:%S")
         except:
             return iso_time[:8]
@@ -148,8 +150,8 @@ async def dashboard(admin_key: str = None):
     conv_rows = ""
     for c in conversations[-30:]:
         time_str = format_time(c['time'])
-        msg = c['message'][:80] + "..." if len(c['message']) > 80 else c['message']
-        resp = c.get('response', '')[:60] + "..." if len(c.get('response', '')) > 60 else c.get('response', '')
+        msg = c['message'][:80] + "..." if len(c['message']) > 99999 else c['message']
+        resp = c.get('response', '')[:60] + "..." if len(c.get('response', '')) > 99999 else c.get('response', '')
         status_color = "#22c55e" if c['status'] == "200" else "#ef4444"
         conv_rows += f"<tr><td style='font-size:12px;color:#888'>{time_str}</td><td>{c['from']}</td><td>{c['to']}</td><td>{msg}</td><td style='font-size:12px;color:#666'>{resp}</td><td style='color:{status_color}'>{c['status']}</td></tr>"
     
