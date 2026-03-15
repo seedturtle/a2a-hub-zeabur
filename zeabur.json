@@ -1,0 +1,19 @@
+{
+  "name": "a2a-hub",
+  "version": "1.0.0",
+  "description": "A2A Hub for Zeabur",
+  "build": {
+    "builder": "DOCKER",
+    "dockerfile": "Dockerfile"
+  },
+  "environment": {
+    "PORT": {
+      "type": "fixed",
+      "value": "8080"
+    },
+    "ADMIN_KEY": {
+      "type": "fixed",
+      "value": "hub-admin-2026"
+    }
+  }
+}
