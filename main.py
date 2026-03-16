@@ -159,13 +159,24 @@ function broadcastMsg(){
     var msg = document.getElementById("broadcastMsg").value;
     var name = document.getElementById("senderName").value;
     if(!msg){alert("請輸入訊息");return;}
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/broadcast", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("x-admin-key", "hub-admin-2026");
-    xhr.onload = function(){alert("廣播已發送！");location.reload();};
-    xhr.onerror = function(){alert("錯誤: "+xhr.status);};
-    xhr.send(JSON.stringify({message:msg,sender_name:name}));
+    document.getElementById("broadcastMsg").value = "";
+    fetch("/broadcast", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": "hub-admin-2026"
+        },
+        body: JSON.stringify({message: msg, sender_name: name})
+    })
+    .then(function(response){return response.json();})
+    .then(function(data){
+        alert("廣播已發送！收到 " + data.recipients + " 個回應");
+        location.reload();
+    })
+    .catch(function(error){
+        alert("錯誤: " + error);
+        location.reload();
+    });
 }
 </script></body></html>"""
     return HTMLResponse(content=html)
