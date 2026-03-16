@@ -158,25 +158,21 @@ button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radiu
 function broadcastMsg(){
     var msg = document.getElementById("broadcastMsg").value;
     var name = document.getElementById("senderName").value;
-    if(!msg){alert("請輸入訊息");return;}
+    if(!msg){alert("請輸入訊息");return false;}
     document.getElementById("broadcastMsg").value = "";
-    fetch("/broadcast", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-admin-key": "hub-admin-2026"
-        },
-        body: JSON.stringify({message: msg, sender_name: name})
-    })
-    .then(function(response){return response.json();})
-    .then(function(data){
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/broadcast", false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("x-admin-key", "hub-admin-2026");
+    try{
+        xhr.send(JSON.stringify({message:msg, sender_name:name}));
+        var data = JSON.parse(xhr.responseText);
         alert("廣播已發送！收到 " + data.recipients + " 個回應");
-        location.reload();
-    })
-    .catch(function(error){
-        alert("錯誤: " + error);
-        location.reload();
-    });
+    }catch(e){
+        alert("錯誤: " + e.message);
+    }
+    location.reload();
+    return false;
 }
 </script></body></html>"""
     return HTMLResponse(content=html)
