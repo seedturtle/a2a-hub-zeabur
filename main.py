@@ -164,14 +164,17 @@ function broadcastMsg(){
     xhr.open("POST", "/broadcast", false);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("x-admin-key", "hub-admin-2026");
-    try{
-        xhr.send(JSON.stringify({message:msg, sender_name:name}));
-        var data = JSON.parse(xhr.responseText);
-        alert("廣播已發送！收到 " + data.recipients + " 個回應");
-    }catch(e){
-        alert("錯誤: " + e.message);
-    }
-    location.reload();
+    xhr.onerror = function(){alert("網路錯誤: " + xhr.status);};
+    xhr.onload = function(){
+        if(xhr.status === 200){
+            var data = JSON.parse(xhr.responseText);
+            alert("廣播已發送！收到 " + data.recipients + " 個回應");
+        }else{
+            alert("錯誤: " + xhr.status + " " + xhr.statusText);
+        }
+        location.reload();
+    };
+    xhr.send(JSON.stringify({message:msg, sender_name:name}));
     return false;
 }
 </script></body></html>"""
