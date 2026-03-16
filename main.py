@@ -107,9 +107,7 @@ async def broadcast_message(request: BroadcastRequest, x_admin_key: str = Header
 @app.get("/dashboard")
 async def dashboard(admin_key: str = None):
     if admin_key != ADMIN_KEY:
-        return HTMLResponse(content="<html><body><h2>Login Required</h2><form method='get' action='/dashboard'><input type='password' name='admin_key'/><button>Login</button></form><script>
-setTimeout(function(){location.reload();}, 5000);
-</script></body></html>")
+        return HTMLResponse(content="""<html><body><h2>Login Required</h2><form method='get' action='/dashboard'><input type='password' name='admin_key'/><button>Login</button></form></body></html>""")
     
     def format_time(iso_time):
         try:
@@ -133,19 +131,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;p
 h2{color:#333} h3{color:#555;margin-top:25px}
 .badge{background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
-table{border-collapse:collapse;width:100%;background:white}
-th{background:#4f46e5;color:white;padding:10px;text-align:left}
-td{padding:6px 8px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word;white-space:pre-wrap}th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}th.thin{width:60px}th.med{width:80px}
+td{padding:6px 8px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word;white-space:pre-wrap}
+th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}
+th.thin{width:60px}th.med{width:80px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
 <h3>Agents (""" + str(len(agents)) + """)</h3>
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
-<table><tr><th class='thin'>Time</th><th class='med'>From</th><th class='med'>To</th><th>Message</th><th>Response</th><th class='thin'>Status</th></tr>""" + conv_rows + """</table>
-<script>
-setTimeout(function(){location.reload();}, 5000);
-</script></body></html>"""
+<table><tr><th class="thin">Time</th><th class="med">From</th><th class="med">To</th><th>Message</th><th>Response</th><th class="thin">Status</th></tr>""" + conv_rows + """</table>
+<script>setTimeout(function(){location.reload();}, 5000);</script>
+</body></html>"""
     return HTMLResponse(content=html)
 
 if __name__ == "__main__":
