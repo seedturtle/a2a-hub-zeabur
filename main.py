@@ -133,14 +133,14 @@ h2{color:#333} h3{color:#555;margin-top:25px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
 table{border-collapse:collapse;width:100%;background:white}
 th{background:#4f46e5;color:white;padding:10px;text-align:left}
-td{padding:8px;border-bottom:1px solid #eee;word-wrap:break-word;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}th{width:auto}
+td{padding:4px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word}th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}th.thin{width:60px}th.med{width:80px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
 <h3>Agents (""" + str(len(agents)) + """)</h3>
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
-<table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Response</th><th>Status</th></tr>""" + conv_rows + """</table>
+<table><tr><th class='thin'>Time</th><th class='med'>From</th><th class='med'>To</th><th>Message</th><th>Response</th><th class='thin'>Status</th></tr>""" + conv_rows + """</table>
 </body></html>"""
     return HTMLResponse(content=html)
 
