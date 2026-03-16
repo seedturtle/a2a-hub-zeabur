@@ -117,7 +117,7 @@ async def dashboard(admin_key: str = None):
         except: return iso_time[:8]
     
     conv_rows = ""
-    for c in conversations[-30:]:
+    for c in list(reversed(conversations[-30:])):
         time_str = format_time(c["time"])
         msg = c["message"]
         resp = c.get("response", "")
