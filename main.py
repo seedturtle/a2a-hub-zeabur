@@ -48,13 +48,13 @@ def add_conversation(from_id: str, to_id: str, message: str, response: str, stat
     conversations.append({"time": datetime.now().isoformat(), "from": from_id, "to": to_id, "message": message, "response": response, "status": status})
     if len(conversations) > 100: conversations.pop(0)
 
-async def call_agent(Agent_url: str, message: str, api_key: str = None) -> str:
+async def call_agent(agent_url: str, message: str, api_key: str = None) -> str:
     headers = {"Content-Type": "application/json"}
     if api_key: headers["Authorization"] = "Bearer " + api_key
     payload = {"model": "openclaw", "messages": [{"role": "user", "content": message}], "max_tokens": 2000}
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(Agent_url + "/v1/chat/completions", json=payload, headers=headers)
+            resp = await client.post(agent_url + "/v1/chat/completions", json=payload, headers=headers)
             if resp.status_code == 200: return resp.json()["choices"][0]["message"]["content"]
             return "Error: " + str(resp.status_code)
     except Exception as e: return "Error: " + str(e)
@@ -134,28 +134,16 @@ h2{color:#333} h3{color:#555;margin-top:25px}
 table{border-collapse:collapse;width:100%;background:white}
 th{background:#4f46e5;color:white;padding:10px;text-align:left}
 td{padding:8px;border-bottom:1px solid #eee;word-wrap:break-word}
-input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:8px 0}
-button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer}
-.row{display:flex;gap:10px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
-<div class="card">
-<div class="row">
-</form>
-</div>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
 <h3>Agents (""" + str(len(agents)) + """)</h3>
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
 <table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Response</th><th>Status</th></tr>""" + conv_rows + """</table>
-<script>
-}
-    document.getElementById("broadcastMsg").value = "";
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/broadcast", false);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("x-admin-key", "hub-admin-2026");
-    xhr.onerror = function(){alert("網路錯誤: " + xhr.status);};
-    xhr.onload = function(){
-        if(xhr.status === 200){
-            var data = JSON.parse(xhr.responseText);
+</body></html>"""
+    return HTMLResponse(content=html)
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
