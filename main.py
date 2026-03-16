@@ -140,13 +140,7 @@ button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radiu
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <div class="card">
-<h3>廣播訊息</h3>
-<form onsubmit="event.preventDefault();broadcastMsg()">
 <div class="row">
-<input type="text" id="broadcastMsg" placeholder="輸入廣播訊息..." style="flex:1">
-<input type="text" id="senderName" placeholder="發送者" value="Admin" style="width:100px">
-<button type="button" onclick="broadcastMsg()">發送</button>
-</div>
 </form>
 </div>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
@@ -155,11 +149,7 @@ button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radiu
 <h3>Recent Conversations</h3>
 <table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Response</th><th>Status</th></tr>""" + conv_rows + """</table>
 <script>
-function broadcastMsg(){
-    var msg = document.getElementById("broadcastMsg").value;
-    var name = document.getElementById("senderName").value;
-    console.log("Broadcasting:", msg, name);
-    if(!msg){alert("請輸入訊息");return false;}
+}
     document.getElementById("broadcastMsg").value = "";
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/broadcast", false);
@@ -169,18 +159,3 @@ function broadcastMsg(){
     xhr.onload = function(){
         if(xhr.status === 200){
             var data = JSON.parse(xhr.responseText);
-            alert("廣播已發送！收到 " + data.recipients + " 個回應");
-        }else{
-            alert("錯誤: " + xhr.status + " " + xhr.statusText);
-        }
-        location.reload();
-    };
-    xhr.send(JSON.stringify({message:msg, sender_name:name}));
-    return false;
-}
-</script></body></html>"""
-    return HTMLResponse(content=html)
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
