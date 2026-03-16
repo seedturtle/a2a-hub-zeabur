@@ -131,8 +131,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;p
 h2{color:#333} h3{color:#555;margin-top:25px}
 .badge{background:#22c55e;color:#fff;padding:4px 12px;border-radius:12px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
-td{padding:6px 8px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word;white-space:pre-wrap}
-th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}
+td{padding:6px 8px;border-bottom:1px solid #eee;font-size:12px;word-wrap:break-word;white-space:pre-wrap}
+th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:13px}
 th.thin{width:60px}th.med{width:80px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
