@@ -145,7 +145,7 @@ button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radiu
 <div class="row">
 <input type="text" id="broadcastMsg" placeholder="輸入廣播訊息..." style="flex:1">
 <input type="text" id="senderName" placeholder="發送者" value="Admin" style="width:100px">
-<button type="submit">發送</button>
+<button type="button" onclick="broadcastMsg()">發送</button>
 </div>
 </form>
 </div>
