@@ -107,7 +107,9 @@ async def broadcast_message(request: BroadcastRequest, x_admin_key: str = Header
 @app.get("/dashboard")
 async def dashboard(admin_key: str = None):
     if admin_key != ADMIN_KEY:
-        return HTMLResponse(content="<html><body><h2>Login Required</h2><form method='get' action='/dashboard'><input type='password' name='admin_key'/><button>Login</button></form></body></html>")
+        return HTMLResponse(content="<html><body><h2>Login Required</h2><form method='get' action='/dashboard'><input type='password' name='admin_key'/><button>Login</button></form><script>
+setTimeout(function(){location.reload();}, 5000);
+</script></body></html>")
     
     def format_time(iso_time):
         try:
@@ -141,7 +143,9 @@ td{padding:6px 8px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-w
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
 <table><tr><th class='thin'>Time</th><th class='med'>From</th><th class='med'>To</th><th>Message</th><th>Response</th><th class='thin'>Status</th></tr>""" + conv_rows + """</table>
-</body></html>"""
+<script>
+setTimeout(function(){location.reload();}, 5000);
+</script></body></html>"""
     return HTMLResponse(content=html)
 
 if __name__ == "__main__":
