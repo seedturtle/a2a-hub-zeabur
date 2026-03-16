@@ -22,7 +22,8 @@ ADMIN_KEY = os.getenv("ADMIN_KEY", "hub-admin-2026")
 agents: Dict[str, dict] = {
     "kiritu": {"name": "Kiritu", "url": "https://kiritu.zeabur.app", "description": "奇異兔", "api_key": "PRSkI0h7mx84YDeg612vpyrbLlU35G9w", "registered_at": "2026-03-15T00:00:00"},
     "terminator": {"name": "Terminator", "url": "https://m90slave.zeabur.app", "description": "Terminator", "api_key": "xt9pa8KcP7kQFHo5n1r2uJ3w4DZ60qjS", "registered_at": "2026-03-15T00:00:00"},
-    "john-connor": {"name": "John Connor", "url": "https://johnconnor.zeabur.app", "description": "John Connor", "api_key": "w6cL7DQus4CE50U9r32kqAjPMpJdxR81", "registered_at": "2026-03-15T00:00:00"}
+    "john-connor": {"name": "John Connor", "url": "https://johnconnor.zeabur.app", "description": "John Connor", "api_key": "w6cL7DQus4CE50U9r32kqAjPMpJdxR81", "registered_at": "2026-03-15T00:00:00"},
+    "yuanyuan": {"name": "圓圓", "url": "https://yuanyuan1234.zeabur.app/a2a", "description": "圓圓小貓咪", "api_key": "SRJew2dDs1f7O68053W4ZpbVQCF9lkgu", "registered_at": "2026-03-16T00:00:00"}
 }
 conversations: List[dict] = []
 
