@@ -133,14 +133,14 @@ h2{color:#333} h3{color:#555;margin-top:25px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
 td{padding:6px 8px;border-bottom:1px solid #eee;font-size:12px;word-wrap:break-word;white-space:pre-wrap}
 th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:13px}
-th.thin{width:60px}th.med{width:80px}
+th.thin{width:50px}th.med{width:60px}th.wide{width:45%}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
 <h3>Agents (""" + str(len(agents)) + """)</h3>
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
-<table><tr><th class="thin">Time</th><th class="med">From</th><th class="med">To</th><th>Message</th><th>Response</th><th class="thin">Status</th></tr>""" + conv_rows + """</table>
+<table><tr><th class="thin">Time</th><th class="med">From</th><th class="med">To</th><th class="wide">Message</th><th class="wide">Response</th><th class="thin">Status</th></tr>""" + conv_rows + """</table>
 <script>setTimeout(function(){location.reload();}, 5000);</script>
 </body></html>"""
     return HTMLResponse(content=html)
