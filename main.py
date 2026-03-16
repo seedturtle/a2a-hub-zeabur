@@ -158,6 +158,7 @@ button{background:#4f46e5;color:white;border:none;padding:12px 24px;border-radiu
 function broadcastMsg(){
     var msg = document.getElementById("broadcastMsg").value;
     var name = document.getElementById("senderName").value;
+    console.log("Broadcasting:", msg, name);
     if(!msg){alert("請輸入訊息");return false;}
     document.getElementById("broadcastMsg").value = "";
     var xhr = new XMLHttpRequest();
