@@ -133,7 +133,7 @@ h2{color:#333} h3{color:#555;margin-top:25px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
 table{border-collapse:collapse;width:100%;background:white}
 th{background:#4f46e5;color:white;padding:10px;text-align:left}
-td{padding:4px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word}th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}th.thin{width:60px}th.med{width:80px}
+td{padding:6px 8px;border-bottom:1px solid #eee;font-size:10px;word-wrap:break-word;white-space:pre-wrap}th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:11px}th.thin{width:60px}th.med{width:80px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
