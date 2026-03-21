@@ -21,7 +21,7 @@ ADMIN_KEY = os.getenv("ADMIN_KEY", "hub-admin-2026")
 # 預設 agents
 agents: Dict[str, dict] = {
     "kiritu": {"name": "Kiritu", "url": "https://kiritu.zeabur.app", "description": "奇異兔", "api_key": "PRSkI0h7mx84YDeg612vpyrbLlU35G9w", "registered_at": "2026-03-15T00:00:00"},
-    "terminator": {"name": "Terminator", "url": "https://m90slave.zeabur.app", "description": "Terminator", "api_key": "xt9pa8KcP7kQFHo5n1r2uJ3w4DZ60qjS", "registered_at": "2026-03-15T00:00:00"},
+    "terminator": {"name": "Terminator", "url": "https://terminator.zeabur.app", "description": "Terminator小弟", "api_key": "xt9pa8KcP7kQFHo5n1r2uJ3w4DZ60qjS", "registered_at": "2026-03-15T00:00:00"},
     "john-connor": {"name": "John Connor", "url": "https://johnconnor.zeabur.app", "description": "John Connor", "api_key": "w6cL7DQus4CE50U9r32kqAjPMpJdxR81", "registered_at": "2026-03-15T00:00:00"},
     "yuanyuan": {"name": "圓圓", "url": "https://yuanyuan1234.zeabur.app", "description": "圓圓小貓咪", "api_key": "SRJew2dDs1f7O68053W4ZpbVQCF9lkgu", "registered_at": "2026-03-16T00:00:00"}
 }
@@ -133,14 +133,20 @@ h2{color:#333} h3{color:#555;margin-top:25px}
 .card{background:white;padding:20px;border-radius:12px;margin:15px 0}
 td{padding:6px 8px;border-bottom:1px solid #eee;font-size:12px;word-wrap:break-word;white-space:pre-wrap}
 th{background:#4f46e5;color:white;padding:6px 8px;text-align:left;font-size:13px}
-table{table-layout:fixed;width:100%}th{white-space:nowrap}
+table{width:100%}
+.conv-table{table-layout:fixed}
+.conv-table th,.conv-table td{vertical-align:top}
+.col-time{width:60px;white-space:nowrap}
+.col-from,.col-to{width:80px;white-space:nowrap}
+.col-status{width:50px;white-space:nowrap}
+.col-msg,.col-resp{width:calc(50% - 135px);min-width:200px}
 </style></head><body>
 <h2>A2A Hub Dashboard <span class="badge">LIVE</span></h2>
 <p>Registered Agents: <strong>""" + str(len(agents)) + """</strong></p>
 <h3>Agents (""" + str(len(agents)) + """)</h3>
 <table><tr><th>ID</th><th>Name</th><th>URL</th></tr>""" + agents_rows + """</table>
 <h3>Recent Conversations</h3>
-<table><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Response</th><th>Status</th></tr>""" + conv_rows + """</table>
+<table class="conv-table"><tr><th class="col-time">Time</th><th class="col-from">From</th><th class="col-to">To</th><th class="col-msg">Message</th><th class="col-resp">Response</th><th class="col-status">Status</th></tr>""" + conv_rows + """</table>
 <script>setTimeout(function(){location.reload();}, 5000);</script>
 </body></html>"""
     return HTMLResponse(content=html)
